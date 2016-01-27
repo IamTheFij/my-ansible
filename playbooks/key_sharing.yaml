@@ -1,18 +1,42 @@
 ---
-- hosts: home
+- name: Sync Github SSH keys
+  hosts: home
+  vars:
+    - current_pub_key: ../ssh/id_rsa_ansible.pub
+    - current_priv_key: ../ssh/id_rsa_ansible
+    - new_pub_key: ../ssh/id_rsa_ansible_new.pub
+    - new_priv_key: ../ssh/id_rsa_ansible_new
   tasks:
-    - name: download latest ssh keys
+    - name: create new ssh key-pair
+      command: ssh-keygen -t rsa -b 4096 -N "" -q -f "{{ new_priv_key }}"
+      when: inventory_hostname == play_hosts[0]
+      delegate_to: localhost
+
+    - name: add new key to authorized_keys
+      authorized_key:
+        key: "{{ lookup('file', new_pub_key) }}"
+        user: "{{ ansible_user }}"
+
+    - name: make use of new private key when connecting
+      set_fact:
+        ansible_private_ssh_key: "{{ new_priv_key }}"
+
+    - name: make new Ansible key exclusive
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key:  "{{ lookup('file', new_pub_key) }}"
+        exclusive: yes
+
+    - name: add authorized keys from Github
       authorized_key:
         user: "{{ ansible_user }}"
         key: https://github.com/iamthefij.keys
-    - name: add this hosts key for safety
-      authorized_key:
-        user: "{{ ansible_user }}"
-        key:  "{{ lookup('file', '/home/ianfijolek/.ssh/id_rsa.pub') }}"
-    - name: add ansible key back, just in case
-      authorized_key:
-        user: "{{ ansible_user }}"
-        key:  "{{ lookup('file', '../ssh/id_rsa_ansible.pub') }}"
+
+    - name: replace key on local machine
+      command: "mv {{ new_priv_key }} {{ current_priv_key }}"
+      when: inventory_hostname == play_hosts[0]
+      delegate_to: localhost
+
   handlers:
     - name: restart sshd
       service: name=sshd state=restarted
