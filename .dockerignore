@@ -1,0 +1,4 @@
+.git*
+Dockerfile
+ssh/id_rsa_ansible*
+tags

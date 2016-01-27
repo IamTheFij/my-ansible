@@ -1,0 +1,20 @@
+---
+- hosts: home
+  tasks:
+    - name: download latest ssh keys
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: https://github.com/iamthefij.keys
+    - name: add this hosts key for safety
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key:  "{{ lookup('file', '/home/ianfijolek/.ssh/id_rsa.pub') }}"
+    - name: add ansible key back, just in case
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key:  "{{ lookup('file', '../ssh/id_rsa_ansible.pub') }}"
+  handlers:
+    - name: restart sshd
+      service: name=sshd state=restarted
+      become: yes
+      become_method: sudo
