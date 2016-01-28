@@ -1,0 +1,37 @@
+---
+- name: home assistant | clone config
+  git:
+    repo: "{{ config_repo }}"
+    dest: "{{ config_dest }}"
+  notify:
+    - home assistant | restart haas
+
+- name: home assistant | install python
+  become: yes
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python3
+    - python3-pip
+
+- name: home assistant | install virtualenv
+  become: yes
+  command: pip install virtualenv
+
+- name: home assistant | install/update haas
+  pip:
+    name: homeassistant
+    virtualenv: "{{ virtualenv_dir }}"
+    virtualenv_python: python3
+    state: latest
+  notify:
+    - home assistant | restart haas
+
+- name: home assistant | install daemon
+  become: yes
+  template:
+    src: home-assistant.service.j2
+    dest: /lib/systemd/system/home-assistant.service
+  notify:
+    - home assistant | restart haas

@@ -1,0 +1,33 @@
+---
+- name: ssh_key_sync | create new ssh key-pair
+  command: ssh-keygen -t rsa -b 4096 -N "" -q -f "{{ new_key }}"
+  when: inventory_hostname == play_hosts[0]
+  delegate_to: localhost
+
+- name: ssh_key_sync | add new key to authorized_keys
+  authorized_key:
+    key: "{{ lookup('file', new_key) }}.pub"
+    user: "{{ ssh_user }}"
+
+- name: ssh_key_sync | make use of new private key when connecting
+  set_fact:
+    ansible_private_ssh_key: "{{ new_key }}"
+
+- name: ssh_key_sync | make new Ansible key exclusive
+  authorized_key:
+    user: "{{ ssh_user }}"
+    key:  "{{ lookup('file', new_key) }}.pub"
+    exclusive: yes
+
+- name: ssh_key_sync | add authorized keys from Github
+  authorized_key:
+    user: "{{ ssh_user }}"
+    key: "{{ github_keys }}"
+
+- name: ssh_key_sync | replace keys on local machine
+  command: "mv {{ item.new }} {{ item.current }}"
+  when: inventory_hostname == play_hosts[0]
+  delegate_to: localhost
+  with_items:
+    - { new: "{{ new_key }}", current: "{{ current_key }}" }
+    - { new: "{{ new_key }}.pub", current: "{{ current_key }}.pub" }

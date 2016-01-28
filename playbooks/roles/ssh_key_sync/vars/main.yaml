@@ -1,0 +1,5 @@
+---
+ssh_user: "{{ ansible_user }}"
+github_keys: https://github.com/iamthefij.keys
+current_key: id_rsa_ansible
+new_key: id_rsa_ansible_new

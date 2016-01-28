@@ -1,0 +1,6 @@
+---
+- name: Sync Github SSH keys
+  hosts: home
+
+  roles:
+    - { role: ssh_key_sync }

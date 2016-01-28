@@ -1,0 +1,5 @@
+---
+hass_user: "{{ ansible_user }}"
+config_repo: git@github.com:IamTheFij/home-assistant-config.git
+config_dest: ~/workspace/home-assistant/config
+virtualenv_dir: ~/workspace/home-assistant/virtualenv_run

@@ -1,0 +1,7 @@
+---
+- name: shoestrap | clone my shoestrap repo
+  git:
+    repo: "{{ repo }}"
+    dest: "{{ dest }}"
+  notify:
+    - shoestrap | run recipes

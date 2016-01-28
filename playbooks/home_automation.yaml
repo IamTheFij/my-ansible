@@ -1,0 +1,6 @@
+---
+- name: Home automation services
+  hosts: raspberrypi.thefij
+
+  roles:
+    - { role: home_assistant }

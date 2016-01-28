@@ -1,0 +1,13 @@
+---
+repo: https://github.com/ViViDboarder/shoestrap.git
+dest: ~/workspace/shoestrap
+command: ansible-cookbook
+cookbook: default
+recipes:
+  - packages
+  - dotfiles
+  - bin
+  - git
+  - neovim
+  - fish-install
+  - fish-config

@@ -35,7 +35,12 @@
         user: "{{ ssh_user }}"
         key: "{{ github_keys }}"
 
-    - name: replace key on local machine
+    - name: replace pub key on local machine
+      command: "mv {{ new_pub_key }}.pub {{ current_priv_key }}.pub"
+      when: inventory_hostname == play_hosts[0]
+      delegate_to: localhost
+
+    - name: replace priv key on local machine
       command: "mv {{ new_priv_key }} {{ current_priv_key }}"
       when: inventory_hostname == play_hosts[0]
       delegate_to: localhost

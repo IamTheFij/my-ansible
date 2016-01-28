@@ -1,0 +1,10 @@
+---
+- name: Set up SSH for new box
+# This is no good. Don't do it yet
+# What we should do:
+#   * SSH in with default user and password auth
+#   * Create user and lock down ssh
+#   * SSH in as user and provision keys
+  roles:
+    - { role: ssh_setup }
+    - { role: ssh_key_sync }

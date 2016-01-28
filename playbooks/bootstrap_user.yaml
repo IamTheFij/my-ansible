@@ -1,0 +1,6 @@
+---
+- name: Bootstraps a setup user
+  hosts: home
+
+  roles:
+    - { role: shoestrap }
