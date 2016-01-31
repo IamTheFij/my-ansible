@@ -1,6 +1,5 @@
 ---
-- name: Sync Github SSH keys
+- name: Rotate and sync SSH keys between all home computers
   hosts: home
-
   roles:
     - { role: ssh_key_sync }

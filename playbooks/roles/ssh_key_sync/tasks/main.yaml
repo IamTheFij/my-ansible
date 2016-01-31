@@ -1,33 +1,41 @@
 ---
+- name: ssh_key_sync | maybe remove previous new key
+  command: rm -f "~/.ssh/{{ item }}"
+  with_items:
+    - "{{ new_key }}"
+    - "{{ new_key }}.pub"
+
 - name: ssh_key_sync | create new ssh key-pair
-  command: ssh-keygen -t rsa -b 4096 -N "" -q -f "{{ new_key }}"
-  when: inventory_hostname == play_hosts[0]
-  delegate_to: localhost
+  command: ssh-keygen -t rsa -b 4096 -C "ansible-home-{{ inventory_hostname_short }}" -N "" -q -f "~/.ssh/{{ new_key }}"
+
+- name: ssh_key_sync | retrieve new pub keys
+  fetch:
+    src: "~/.ssh/{{ new_key }}.pub"
+    dest: "{{ role_path }}/pub_keys/{{ new_key }}-{{ inventory_hostname }}.pub"
+    fail_on_missing: yes
+    flat: yes
+
+- name: ssh_key_sync | add control key to authorized_keys
+  authorized_key:
+    key: "{{ lookup('file', role_path+'/pub_keys/id_rsa_ansible_control.pub')}}"
+    user: "{{ ssh_user }}"
+    exclusive: yes
+
+- name: ssh_key_sync | add shared keys to authorized_keys
+  authorized_key:
+    key: "{{ lookup('file', role_path+'/pub_keys/shared_keys')}}"
+    user: "{{ ssh_user }}"
 
 - name: ssh_key_sync | add new key to authorized_keys
   authorized_key:
-    key: "{{ lookup('file', new_key) }}.pub"
+    key: "{{ lookup('file', role_path+'/pub_keys/'+new_key+'-'+item+'.pub')}}"
     user: "{{ ssh_user }}"
-
-- name: ssh_key_sync | make use of new private key when connecting
-  set_fact:
-    ansible_private_ssh_key: "{{ new_key }}"
-
-- name: ssh_key_sync | make new Ansible key exclusive
-  authorized_key:
-    user: "{{ ssh_user }}"
-    key:  "{{ lookup('file', new_key) }}.pub"
-    exclusive: yes
-
-- name: ssh_key_sync | add authorized keys from Github
-  authorized_key:
-    user: "{{ ssh_user }}"
-    key: "{{ github_keys }}"
+  with_items: "{{ play_hosts }}"
 
 - name: ssh_key_sync | replace keys on local machine
-  command: "mv {{ item.new }} {{ item.current }}"
-  when: inventory_hostname == play_hosts[0]
-  delegate_to: localhost
+  command: "mv ~/.ssh/{{ item.new }} ~/.ssh/{{ item.current }}"
   with_items:
+    - { new: "{{ current_key }}", current: "{{ current_key }}.old" }
+    - { new: "{{ current_key }}.pub", current: "{{ current_key }}.pub.old" }
     - { new: "{{ new_key }}", current: "{{ current_key }}" }
     - { new: "{{ new_key }}.pub", current: "{{ current_key }}.pub" }
