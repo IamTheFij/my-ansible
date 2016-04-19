@@ -1,0 +1,11 @@
+---
+- name: qnap_optware | install qpkg
+  # Put url in a variable
+  command: 'wget -o - http://entware.zyxmon.org/binaries/x86-64/installer/Entware-ng_0.96.qpkg | /bin/sh'
+
+# opkg update
+# install mosh-server
+- name: qnap_optware | install packages
+  packages:
+    - mosh
+
