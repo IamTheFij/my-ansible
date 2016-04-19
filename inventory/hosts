@@ -1,6 +1,8 @@
 localhost
 
 [home]
+router ansible_host=192.168.2.1
 ianubuntu.thefij
 raspberrypi.thefij
 ians-imac.thefij
+home-nas.thefij
