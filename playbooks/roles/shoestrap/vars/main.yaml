@@ -10,4 +10,4 @@ recipes:
   - git
   - neovim
   - fish-install
-  - fish-config
+  - fisherman
